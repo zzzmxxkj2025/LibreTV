@@ -1,8 +1,6 @@
 // 全局变量
 let currentApiSource = localStorage.getItem('currentApiSource') || 'heimuer';
 let customApiUrl = localStorage.getItem('customApiUrl') || '';
-// 添加自动播放下一集设置，默认开启
-let autoPlayNext = localStorage.getItem('autoPlayNext') !== 'false';
 // 添加当前播放的集数索引
 let currentEpisodeIndex = 0;
 // 添加当前视频的所有集数
@@ -46,8 +44,8 @@ async function updateSiteStatusWithTest(source) {
     if (cachedResult) {
         try {
             const { isAvailable, timestamp } = JSON.parse(cachedResult);
-            // 缓存有效期为1小时
-            if (Date.now() - timestamp < 3600000) {
+            // 缓存有效期为2个月
+            if (Date.now() - timestamp < 5184000000) {
                 updateSiteStatus(isAvailable);
                 return;
             }
@@ -129,14 +127,6 @@ function setupEventListeners() {
     document.getElementById('searchInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             search();
-        }
-    });
-
-    // 添加自动播放开关事件监听
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'autoPlayToggle') {
-            autoPlayNext = e.target.checked;
-            localStorage.setItem('autoPlayNext', autoPlayNext);
         }
     });
 
@@ -296,18 +286,7 @@ async function showDetails(id, vod_name) {
             if (safeEpisodes.length === 0) {
                 modalContent.innerHTML = '<p class="text-center text-gray-400 py-8">没有找到可用的播放链接</p>';
             } else {
-                // 添加自动播放下一集开关
-                const autoPlayCheckbox = `
-                    <div class="mb-4 flex items-center justify-end">
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="autoPlayToggle" class="sr-only peer" ${autoPlayNext ? 'checked' : ''}>
-                            <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            <span class="ms-3 text-sm font-medium text-gray-300">自动播放下一集</span>
-                        </label>
-                    </div>
-                `;
-                
-                modalContent.innerHTML = autoPlayCheckbox + `
+                modalContent.innerHTML = `
                     <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                         ${safeEpisodes.map((episode, index) => `
                             <button id="episode-${index}" onclick="playVideo('${episode}','${vod_name.replace(/"/g, '&quot;')}', ${index})" 
@@ -410,13 +389,10 @@ function playVideo(url, vod_name, episodeIndex = 0) {
         }
         
         // 获取当前HTML内容并查找剧集列表
-        const autoPlayCheckbox = modalContent.querySelector('#autoPlayToggle');
-        const autoPlayWrapper = autoPlayCheckbox ? autoPlayCheckbox.closest('div.flex') : null;
         const episodesList = modalContent.querySelector('.grid');
         
         if (episodesList) {
-            // 保留自动播放开关和剧集列表
-            const autoPlayHtml = autoPlayWrapper ? autoPlayWrapper.outerHTML : '';
+            // 保留剧集列表
             const episodesHtml = episodesList.outerHTML;
             
             modalContent.innerHTML = `
@@ -435,37 +411,11 @@ function playVideo(url, vod_name, episodeIndex = 0) {
                         </iframe>
                     </div>
                     ${navigationControls}
-                    ${autoPlayHtml}
                     <div class="episodes-list mt-4">
                         ${episodesHtml}
                     </div>
                 </div>
             `;
-            
-            // 设置自动播放下一集功能
-            const iframe = document.getElementById('videoIframe');
-            if (iframe) {
-                // 监听视频播放结束事件
-                iframe.onload = function() {
-                    hideLoading();
-                    try {
-                        // 使用postMessage监听播放器事件
-                        window.addEventListener('message', function(event) {
-                            try {
-                                const data = JSON.parse(event.data);
-                                if (data && data.event === 'ended' && autoPlayNext && hasNext) {
-                                    // 自动播放下一集
-                                    playNextEpisode();
-                                }
-                            } catch (e) {
-                                // 忽略非JSON消息
-                            }
-                        });
-                    } catch (e) {
-                        console.error('设置播放结束监听失败:', e);
-                    }
-                };
-            }
         } else {
             // 没有找到剧集列表，重新创建完整内容
             modalContent.innerHTML = `
@@ -484,13 +434,6 @@ function playVideo(url, vod_name, episodeIndex = 0) {
                         </iframe>
                     </div>
                     ${navigationControls}
-                    <div class="mb-4 flex items-center justify-end">
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="autoPlayToggle" class="sr-only peer" ${autoPlayNext ? 'checked' : ''}>
-                            <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            <span class="ms-3 text-sm font-medium text-gray-300">自动播放下一集</span>
-                        </label>
-                    </div>
                 </div>
             `;
         }
