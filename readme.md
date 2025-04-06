@@ -6,6 +6,10 @@ LibreTV是一个轻量级、免费的在线视频搜索与观看平台，提供�
 
 本项目基于 https://github.com/bestK/tv
 
+演示站：https://libretv.is-an.org/
+
+<img src="https://testingcf.jsdelivr.net/gh/bestZwei/imgs@master/picgo/image-20250406231222216.png" alt="image-20250406231222216" style="zoom:67%;" />
+
 ## ✨ 主要特性
 
 - 🔍 多源视频搜索功能，覆盖电影、电视剧等内容
