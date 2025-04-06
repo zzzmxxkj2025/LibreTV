@@ -261,29 +261,32 @@ async function showDetails(id, vod_name) {
         modalTitle.textContent = vod_name || '未知视频';
         
         if (data.episodes && data.episodes.length > 0) {
-            // 安全处理集数URL
+            // 使用水平滚动容器展示集数，并添加左右箭头按钮
             const safeEpisodes = data.episodes.map(url => {
                 try {
-                    // 确保URL是有效的并且是http或https开头
                     return url && (url.startsWith('http://') || url.startsWith('https://'))
                         ? url.replace(/"/g, '&quot;')
                         : '';
                 } catch (e) {
                     return '';
                 }
-            }).filter(url => url); // 过滤掉空URL
+            }).filter(url => url);
             
             if (safeEpisodes.length === 0) {
                 modalContent.innerHTML = '<p class="text-center text-gray-400 py-8">没有找到可用的播放链接</p>';
             } else {
                 modalContent.innerHTML = `
-                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                        ${safeEpisodes.map((episode, index) => `
-                            <button onclick="playVideo('${episode}','${vod_name.replace(/"/g, '&quot;')}')" 
-                                    class="px-4 py-2 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-white rounded-lg transition-colors text-center">
-                                第${index + 1}集
-                            </button>
-                        `).join('')}
+                    <div class="relative">
+                        <button id="prevBtn" onclick="scrollEpisodes('left')" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-gray-700 text-white px-2 py-1">&larr;</button>
+                        <div id="episodesContainer" class="flex overflow-x-auto space-x-2 px-8">
+                            ${safeEpisodes.map((episode, index) => `
+                                <button onclick="playVideo('${episode}','${vod_name.replace(/"/g, '&quot;')}')" 
+                                        class="px-4 py-2 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-white rounded-lg transition-colors text-center flex-shrink-0">
+                                    第${index + 1}集
+                                </button>
+                            `).join('')}
+                        </div>
+                        <button id="nextBtn" onclick="scrollEpisodes('right')" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-gray-700 text-white px-2 py-1">&rarr;</button>
                     </div>
                 `;
             }
@@ -301,6 +304,18 @@ async function showDetails(id, vod_name) {
         }
     } finally {
         hideLoading();
+    }
+}
+
+// 新增左右滚动切换集数的函数
+function scrollEpisodes(direction) {
+    const container = document.getElementById('episodesContainer');
+    if (!container) return;
+    const scrollAmount = 150; // 每次滚动距离
+    if (direction === 'left') {
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else if (direction === 'right') {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
 }
 
