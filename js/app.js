@@ -322,8 +322,8 @@ function playVideo(url, vod_name) {
             episodeNumber = event.target.textContent.replace(/[^0-9]/g, '') || '1';
         }
         
-        // 安全处理URL和标题
-        const safeUrl = encodeURIComponent(url);
+        // Remove URL encoding to prevent double encoding issues
+        const safeUrl = url;
         const safeTitle = vod_name ? vod_name.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '未知视频';
         
         // 更新标题显示
@@ -348,8 +348,8 @@ function playVideo(url, vod_name) {
                             width="100%" 
                             height="600" 
                             frameborder="0" 
-                            scrolling="no" 
-                            allowfullscreen="true"
+                            scrolling="no"
+                            allow="autoplay; encrypted-media; fullscreen"
                             onload="hideLoading()"
                             onerror="handlePlayerError()">
                         </iframe>
@@ -371,8 +371,8 @@ function playVideo(url, vod_name) {
                                 width="100%" 
                                 height="600" 
                                 frameborder="0" 
-                                scrolling="no" 
-                                allowfullscreen="true"
+                                scrolling="no"
+                                allow="autoplay; encrypted-media; fullscreen"
                                 onload="hideLoading()"
                                 onerror="handlePlayerError()">
                             </iframe>
@@ -392,8 +392,8 @@ function playVideo(url, vod_name) {
                                 width="100%" 
                                 height="600" 
                                 frameborder="0" 
-                                scrolling="no" 
-                                allowfullscreen="true"
+                                scrolling="no"
+                                allow="autoplay; encrypted-media; fullscreen"
                                 onload="hideLoading()"
                                 onerror="handlePlayerError()">
                             </iframe>
