@@ -74,3 +74,37 @@
     background-color: #333;
     border-color: #555;
 }
+
+/* 页脚样式 */
+.footer {
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+/* 当内容较少时，确保页脚在底部 */
+@media screen and (min-height: 800px) {
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    
+    .container {
+        flex: 1;
+    }
+    
+    .footer {
+        margin-top: auto;
+    }
+}
+
+/* 在小屏幕上的页脚样式优化 */
+@media screen and (max-width: 640px) {
+    .footer {
+        padding-bottom: 2rem;
+    }
+}
