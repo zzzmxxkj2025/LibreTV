@@ -130,24 +130,23 @@
                 
                 let isAdSegment = false;
                 let adSegmentStartIndex = -1;
-                let lastNonAdLine = -1;
+                let lastNonAdLine = '';
                 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
                     
                     // 检测广告标记 - 更精确的检测逻辑
-                    const isPotentialAd = line.includes('#EXT-X-DISCONTINUITY') || 
+                    if (line.includes('#EXT-X-DISCONTINUITY') || 
                         line.includes('#EXT-X-CUE-OUT') || 
                         line.includes('#EXT-X-CUE-IN') || 
                         line.includes('#EXT-X-SPLICEPOINT') ||
-                        (strictMode && (line.toLowerCase().includes('ad') || 
-                        line.includes('commercial') || 
-                        line.includes('promo')));
-                    
-                    if (isPotentialAd && lastNonAdLine !== i - 1) {
-                        isAdSegment = true;
-                        adSegmentStartIndex = i;
-                        continue;
+                        (strictMode && (line.includes('ad') || line.includes('AD') || line.includes('Ad')))) {
+                        // 确保不是误判为广告
+                        if (!lastNonAdLine.includes('#EXT-X-MAP') && !lastNonAdLine.includes('#EXT-X-KEY')) {
+                            isAdSegment = true;
+                            adSegmentStartIndex = i;
+                            continue;
+                        }
                     }
                     
                     if (isAdSegment) {
@@ -168,7 +167,6 @@
                             }
                             i++; // 跳过URL行
                             isAdSegment = false;
-                            lastNonAdLine = i;
                         } else if (line.includes('#EXT-X-DISCONTINUITY-SEQUENCE') || 
                                   line.includes('#EXT-X-ENDLIST')) {
                             isAdSegment = false;
@@ -176,7 +174,7 @@
                     } else {
                         // 非广告分段，直接添加到过滤后的结果中
                         filteredLines.push(line);
-                        lastNonAdLine = i;
+                        lastNonAdLine = line;
                     }
                 }
                 
@@ -197,9 +195,19 @@
                     maxMaxBufferLength: 600,
                     maxBufferSize: 60 * 1000 * 1000,
                     maxBufferHole: 0.5,
-                    maxFragLookUpTolerance: 0.25,
-                    stretchShortVideoTrack: true,
-                    forceKeyFrameOnDiscontinuity: true
+                    fragLoadingMaxRetry: 6,
+                    fragLoadingMaxRetryTimeout: 64000,
+                    fragLoadingRetryDelay: 1000,
+                    manifestLoadingMaxRetry: 3,
+                    manifestLoadingRetryDelay: 1000,
+                    levelLoadingMaxRetry: 4,
+                    levelLoadingRetryDelay: 1000,
+                    startLevel: -1,
+                    abrEwmaDefaultEstimate: 500000,
+                    abrBandWidthFactor: 0.95,
+                    abrBandWidthUpFactor: 0.7,
+                    abrMaxWithRealBitrate: true,
+                    stretchShortVideoTrack: true
                 };
                 
                 const dp = new DPlayer({
