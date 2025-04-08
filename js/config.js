@@ -25,6 +25,16 @@ const API_SITES = {
         name: '非凡影视',
         detail: 'http://ffzy5.tv',
     },
+    tyyszy: {
+        api: 'https://tyyszy.com',
+        name: '天涯资源',
+        detail: 'https://tyyszy.com',
+    },
+    ckzy: {
+        api: 'https://www.ckzy1.com',
+        name: 'CK资源',
+        detail: 'https://www.ckzy1.com',
+    },
     
 };
 
